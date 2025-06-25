@@ -12,6 +12,8 @@ namespace EnvantoryManagement.Controllers;
 public class ContainerController(AppDbContext context): ControllerBase
 {
     [HttpPost]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public IActionResult Create(ContainerCreateDto dto)
     {
         var container = new Container
@@ -28,6 +30,8 @@ public class ContainerController(AppDbContext context): ControllerBase
     }
 
     [HttpGet("{id}/items")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public IActionResult GetItems(int id)
     {
         var container = context.Containers
@@ -50,6 +54,8 @@ public class ContainerController(AppDbContext context): ControllerBase
     }
 
     [HttpPut("{id}/location/{locationId}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public IActionResult UpdateLocation(int id, int locationId)
     {
         var container = context.Containers.Find(id);

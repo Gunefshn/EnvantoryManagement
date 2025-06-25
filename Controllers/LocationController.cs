@@ -9,6 +9,7 @@ namespace EnvantoryManagement.Controllers;
 
 [ApiController]
 [Route("/location")]
+
 public class LocationController(AppDbContext context): ControllerBase
 {
     [HttpPost]

@@ -1,8 +1,6 @@
 using EnvantoryManagement.Data;
 using EnvantoryManagement.Models.DTOs;
-using EnvantoryManagement.Models.DTOs.Container;
 using EnvantoryManagement.Models.Entities;
-using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,7 +31,36 @@ public class ItemController(AppDbContext context): ControllerBase
 
         return Ok(result); 
     }
+    
+    [HttpGet("search")]
+    [ProducesResponseType(typeof(ItemDto[]), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult Search([FromQuery] string query)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+            return BadRequest("Arama metni boş olamaz.");
 
+        var items = context.Items
+            .Include(i => i.Tags)
+            .Include(i => i.Container)
+            .Where(i => i.Name.ToLower().Contains(query.ToLower()))
+            .ToList();
+
+        if (!items.Any())
+            return NotFound("Aranan ifadeye uygun ürün bulunamadı.");
+
+        var result = items.Select(item => new ItemDto
+        {
+            Name = item.Name,
+            Quantity = item.Quantity,
+            ContainerName = item.Container?.Name,
+            Tags = item.Tags.Select(t => t.Name).ToArray()
+        }).ToList();
+
+        return Ok(result);
+    }
+    
+    
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -61,6 +88,8 @@ public class ItemController(AppDbContext context): ControllerBase
     }
     
     [HttpPut("{id}/tags")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public IActionResult AssignTags(int id, ItemAssignTagsDto dto)
     {
         var item = context.Items.Include(i => i.Tags).FirstOrDefault(i => i.Id == id);
@@ -80,6 +109,8 @@ public class ItemController(AppDbContext context): ControllerBase
     }
     
     [HttpPut("{id}/container")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public IActionResult AssignContainer(int id, ItemAssignContainerDto dto)
     {
         var item = context.Items.Find(id);
@@ -98,6 +129,8 @@ public class ItemController(AppDbContext context): ControllerBase
     }
     
     [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public IActionResult Delete(int id)
     {
         var item = context.Items.Find(id);
