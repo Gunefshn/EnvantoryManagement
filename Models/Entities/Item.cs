@@ -1,10 +1,18 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace EnvantoryManagement.Models.Entities;
 
-public class Envantory
+public class Item
 {
-    public int Id { get; set; }                    
-    public string Name { get; set; }             
-    public int Quantity { get; set; }             
-    public DateTime CreatedAt { get; set; }= DateTime.Now;  
-    public DateTime UpdatedAt { get; set; }=DateTime.Now;
+    public int Id { get; set; }
+    [Required,MaxLength(200)]
+    public string Name { get; set; } = String.Empty;
+    [Required]
+    public int Quantity { get; set; }
+    public int ContainerId { get; set; }
+    public Container Container { get; set; }
+    public ICollection<Tag> Tags { get; set; } 
+    
+    public DateTime Created { get; set; } = DateTime.Now;
+    public DateTime Updated { get; set; }
 }
