@@ -6,5 +6,6 @@ public class ItemCreateDto
     public int Quantity { get; set; }
     public int ContainerId { get; set; }
     public List<string> Tags { get; set; }
-    public DateTime Created { get; set; }=DateTime.Now;
+    public DateTime? ExpiryDate { get; set; } // SKT
+    public DateTime Created { get; set; } =DateTime.Now;
 }

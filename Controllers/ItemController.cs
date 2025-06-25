@@ -59,8 +59,71 @@ public class ItemController(AppDbContext context): ControllerBase
 
         return Ok(result);
     }
-    
-    
+    [HttpGet("expired")]
+    public IActionResult GetExpiredItems()
+    {
+        var today = DateTime.Today;
+
+        var items = context.Items
+            .Include(i => i.Tags)
+            .Include(i => i.Container)
+            .Where(i => i.ExpiryDate.HasValue && i.ExpiryDate < today)
+            .ToList();
+
+        var result = items.Select(item => new ItemDto
+        {
+            Name = item.Name,
+            Quantity = item.Quantity,
+            ContainerName = item.Container?.Name,
+            Tags = item.Tags.Select(t => t.Name).ToArray(),
+            ExpiryDate = item.ExpiryDate
+        }).ToList();
+
+        return Ok(result);
+    }
+    [HttpGet("expiring-soon")]
+    public IActionResult GetExpiringSoonItems()
+    {
+        var today = DateTime.Today;
+        var threshold = today.AddDays(7);
+
+        var items = context.Items
+            .Include(i => i.Tags)
+            .Include(i => i.Container)
+            .Where(i => i.ExpiryDate.HasValue && i.ExpiryDate >= today && i.ExpiryDate <= threshold)
+            .ToList();
+
+        var result = items.Select(item => new ItemDto
+        {
+            Name = item.Name,
+            Quantity = item.Quantity,
+            ContainerName = item.Container?.Name,
+            Tags = item.Tags.Select(t => t.Name).ToArray(),
+            ExpiryDate = item.ExpiryDate
+        }).ToList();
+
+        return Ok(result);
+    }
+    [HttpGet("with-expiry")]
+    public IActionResult GetItemsWithExpiry()
+    {
+        var items = context.Items
+            .Include(i => i.Tags)
+            .Include(i => i.Container)
+            .Where(i => i.ExpiryDate.HasValue)
+            .ToList();
+
+        var result = items.Select(item => new ItemDto
+        {
+            Name = item.Name,
+            Quantity = item.Quantity,
+            ContainerName = item.Container?.Name,
+            Tags = item.Tags.Select(t => t.Name).ToArray(),
+            ExpiryDate = item.ExpiryDate
+        }).ToList();
+
+        return Ok(result);
+    }
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
